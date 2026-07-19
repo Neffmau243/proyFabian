@@ -1,0 +1,28 @@
+{
+  "name": "aprendeia-prototipo",
+  "version": "1.0.0",
+  "description": "Prototipo de plataforma de aprendizaje asistida por IA para Interaccion Hombre-Maquina.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "start:3001": "node -e \"process.env.PORT=3001; require('./server')\"",
+    "test": "node test.js"
+  },
+  "keywords": [
+    "ihm",
+    "gemini",
+    "aprendizaje",
+    "prototipo"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@google/genai": "^2.12.0",
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.2.0",
+    "mysql2": "^3.23.1",
+    "pdf-parse": "^2.4.5"
+  }
+}

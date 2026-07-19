@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AprendeIA - Plataforma educativa inteligente</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ─── PANTALLA DE AUTH (login/register) ──────────────────────────────────── -->
+<section class="auth-screen" id="authScreen">
+  <div class="auth-card">
+    <div class="auth-brand">
+      <div class="brand-mark">AI</div>
+      <h1>AprendeIA</h1>
+      <p>Plataforma educativa inteligente</p>
+    </div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-tab="login">Iniciar sesión</button>
+      <button class="auth-tab" data-tab="register">Crear cuenta</button>
+    </div>
+
+    <!-- Login -->
+    <form class="auth-form active" id="loginForm">
+      <div class="field">
+        <label for="loginEmail">Email</label>
+        <input id="loginEmail" type="email" placeholder="tu@email.com" required>
+      </div>
+      <div class="field">
+        <label for="loginPassword">Contraseña</label>
+        <input id="loginPassword" type="password" placeholder="••••••" required>
+      </div>
+      <div class="auth-error" id="loginError"></div>
+      <button class="btn-primary" type="submit">Entrar</button>
+    </form>
+
+    <!-- Register -->
+    <form class="auth-form" id="registerForm">
+      <div class="field">
+        <label for="regName">Nombre</label>
+        <input id="regName" type="text" placeholder="Tu nombre" required>
+      </div>
+      <div class="field">
+        <label for="regEmail">Email</label>
+        <input id="regEmail" type="email" placeholder="tu@email.com" required>
+      </div>
+      <div class="field">
+        <label for="regPassword">Contraseña</label>
+        <input id="regPassword" type="password" placeholder="Mínimo 6 caracteres" required minlength="6">
+      </div>
+      <div class="auth-error" id="registerError"></div>
+      <button class="btn-primary" type="submit">Crear cuenta</button>
+    </form>
+  </div>
+</section>
+
+<!-- ─── APP (logueado) ─────────────────────────────────────────────────────── -->
+<div class="app-shell" id="appShell" style="display:none">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">AI</div>
+      <div>
+        <p>AprendeIA</p>
+        <span id="userName">Usuario</span>
+      </div>
+    </div>
+
+    <nav class="nav-list">
+      <button class="nav-item active" data-view="dashboard" type="button">📚 Mis Cursos</button>
+      <button class="nav-item" data-view="curso" type="button">📖 Curso Actual</button>
+      <button class="nav-item" data-view="chat" type="button">💬 Tutor IA</button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="nav-item logout-btn" id="logoutBtn" type="button">🚪 Cerrar sesión</button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+
+    <!-- ─── DASHBOARD ────────────────────────────────────────────────────── -->
+    <section class="view active-view" id="dashboard">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Panel del estudiante</p>
+          <h2>Mis Cursos</h2>
+        </div>
+        <button class="btn-primary" id="createCourseBtn" type="button">+ Nuevo curso</button>
+      </div>
+
+      <!-- Modal crear curso -->
+      <div class="modal-overlay" id="courseModal">
+        <div class="modal-card">
+          <h3>Nuevo Curso</h3>
+          <form id="courseForm">
+            <div class="field">
+              <label>Título del curso</label>
+              <input id="courseTitle" type="text" placeholder="Ej: Interacción Hombre-Máquina" required>
+            </div>
+            <div class="field">
+              <label>Descripción (opcional)</label>
+              <textarea id="courseDesc" rows="3" placeholder="¿De qué trata el curso?"></textarea>
+            </div>
+            <div class="field">
+              <label>Límite de PDFs</label>
+              <input id="coursePdfLimit" type="number" value="20" min="1" max="100">
+            </div>
+            <div class="modal-actions">
+              <button type="button" class="btn-ghost" id="cancelCourseBtn">Cancelar</button>
+              <button type="submit" class="btn-primary">Crear curso</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="course-grid" id="courseGrid">
+        <div class="empty-state" id="emptyCourses">
+          <p>📚 Aún no tienes cursos. ¡Crea tu primer curso!</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── CURSO ACTUAL ─────────────────────────────────────────────────── -->
+    <section class="view" id="curso">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow" id="cursoEyebrow">Curso</p>
+          <h2 id="cursoTitle">Selecciona un curso</h2>
+        </div>
+        <div class="pdf-counter" id="pdfCounter">0 / 20 PDFs</div>
+      </div>
+
+      <div class="curso-desc" id="cursoDesc"></div>
+
+      <!-- Subir PDF -->
+      <div class="upload-area" id="uploadArea">
+        <form id="uploadForm">
+          <div class="upload-dropzone" id="dropzone">
+            <p>📄 Arrastra un PDF aquí o haz clic para seleccionar</p>
+            <p class="upload-hint">PDF hasta 20 MB</p>
+            <input type="file" accept=".pdf" id="pdfInput" style="display:none">
+          </div>
+          <button class="btn-primary" type="submit" id="uploadBtn" style="display:none">Subir PDF</button>
+        </form>
+        <div class="upload-progress" id="uploadProgress" style="display:none">
+          <div class="bar"><span></span></div>
+          <p>Procesando PDF...</p>
+        </div>
+      </div>
+
+      <!-- Lista de documentos -->
+      <div class="documentos-list" id="documentosList">
+        <h3>Documentos del curso</h3>
+        <div class="empty-state" id="emptyDocs">
+          <p>📄 Sube tu primer PDF para comenzar</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── CHAT / TUTOR IA ───────────────────────────────────────────────── -->
+    <section class="view" id="chat">
+      <div class="chat-layout">
+        <div class="chat-main">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Tutor inteligente</p>
+              <h2>Pregunta sobre tus cursos</h2>
+            </div>
+            <span class="ai-badge" id="chatBadge">Demo</span>
+          </div>
+
+          <div class="chat-box" id="chatBox">
+            <div class="message ai">Hola 👋 Selecciona un curso de la lista y pregúntame sobre su contenido.</div>
+          </div>
+
+          <form class="chat-form" id="chatForm">
+            <select id="chatCursoSelect" class="chat-select">
+              <option value="">— Selecciona un curso —</option>
+            </select>
+            <div class="chat-input-row">
+              <input id="chatInput" type="text" placeholder="Escribe tu duda..." autocomplete="off" disabled>
+              <button class="send-button" type="submit" disabled>Enviar</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="chat-sidebar">
+          <h3>Documentos disponibles</h3>
+          <div id="chatDocsList">
+            <p class="muted">Selecciona un curso para ver sus documentos</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="app-footer">
+      <p>AprendeIA &mdash; Plataforma educativa inteligente &copy; 2026</p>
+    </footer>
+  </main>
+</div>  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
