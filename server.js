@@ -19,6 +19,8 @@ app.use("/api/auth", require("./src/routes/auth"));
 app.use("/api/cursos", require("./src/routes/cursos"));
 app.use("/api/chat", require("./src/routes/chat"));
 app.use("/api/status", require("./src/routes/status"));
+app.use("/api/evaluacion", require("./src/routes/evaluacion"));
+app.use("/api/dashboard", require("./src/routes/dashboard"));
 
 // ─── Fallback SPA: cualquier ruta que no sea API → index.html ───────────────
 app.use((req, res) => {

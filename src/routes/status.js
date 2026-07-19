@@ -1,6 +1,6 @@
 const express = require("express");
-const { GoogleGenAI } = require("@google/genai");
 const { testConnection } = require("../config/db");
+const { tieneGeminiValido } = require("../utils/geminiHelper");
 
 const router = express.Router();
 
@@ -30,14 +30,5 @@ router.get("/", async (req, res) => {
     version: "1.0.0",
   });
 });
-
-function tieneGeminiValido(key) {
-  if (!key) return false;
-
-  const normalized = key.toLowerCase().replace(/[^a-z0-9]/g, "");
-  const placeholders = ["tuclave", "yourapikeyhere", "placeholder", "tuclavedegeminiaqui"];
-
-  return !placeholders.some((c) => normalized.includes(c));
-}
 
 module.exports = router;

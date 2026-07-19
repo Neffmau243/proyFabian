@@ -1,13 +1,11 @@
 const express = require("express");
-const { GoogleGenAI } = require("@google/genai");
 const { query } = require("../config/db");
 const { authMiddleware } = require("../middleware/auth");
+const { tieneGeminiValido, crearClienteGemini } = require("../utils/geminiHelper");
 
 const router = express.Router();
 
-const GEMINI_CLIENT = hasValidGeminiKey()
-  ? new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY })
-  : null;
+const GEMINI_CLIENT = crearClienteGemini();
 
 const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.0-flash";
 
@@ -129,15 +127,6 @@ function responderDemo(mensaje, documentos) {
   }
 
   return `Tengo ${documentos.length} documento(s) en este curso. Pregúntame algo específico sobre su contenido y te responderé basado en ellos.`;
-}
-
-function hasValidGeminiKey() {
-  const value = String(process.env.GEMINI_API_KEY || "").trim();
-  if (!value) return false;
-
-  const normalized = value.toLowerCase().replace(/[^a-z0-9]/g, "");
-  const placeholders = ["tuclave", "yourapikeyhere", "placeholder", "tuclavedegeminiaqui"];
-  return !placeholders.some((c) => normalized.includes(c));
 }
 
 module.exports = router;

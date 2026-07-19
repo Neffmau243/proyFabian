@@ -102,10 +102,42 @@ async function runMigrations() {
     ) ENGINE=InnoDB
   `;
 
+  const crearEvaluaciones = `
+    CREATE TABLE IF NOT EXISTS evaluaciones (
+      id                INT           AUTO_INCREMENT PRIMARY KEY,
+      usuario_id        INT           NOT NULL,
+      curso_id          INT           NOT NULL,
+      titulo            VARCHAR(255)  NOT NULL DEFAULT '',
+      total_preguntas   INT           NOT NULL DEFAULT 20,
+      respuestas_correctas INT       NOT NULL DEFAULT 0,
+      nota              DECIMAL(5,2)  NOT NULL DEFAULT 0,
+      completado        BOOLEAN       NOT NULL DEFAULT FALSE,
+      created_at        TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+      FOREIGN KEY (curso_id)   REFERENCES cursos(id)   ON DELETE CASCADE
+    ) ENGINE=InnoDB
+  `;
+
+  const crearPreguntas = `
+    CREATE TABLE IF NOT EXISTS preguntas_evaluacion (
+      id                  INT           AUTO_INCREMENT PRIMARY KEY,
+      evaluacion_id       INT           NOT NULL,
+      pregunta            TEXT          NOT NULL,
+      opciones            JSON          NOT NULL,
+      respuesta_correcta  INT           NOT NULL,
+      respuesta_usuario   INT           DEFAULT NULL,
+      es_correcta         BOOLEAN       DEFAULT NULL,
+      created_at          TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (evaluacion_id) REFERENCES evaluaciones(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB
+  `;
+
   try {
     await execute(crearUsuarios);
     await execute(crearCursos);
     await execute(crearDocumentos);
+    await execute(crearEvaluaciones);
+    await execute(crearPreguntas);
     console.log("✅ Migraciones ejecutadas (tablas listas)");
   } catch (error) {
     console.error("❌ Error en migraciones:", error.message);

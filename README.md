@@ -1,145 +1,174 @@
 # AprendeIA - Plataforma de aprendizaje con IA
 
-AprendeIA es un prototipo web para un trabajo de Interaccion Hombre-Maquina. La propuesta muestra una plataforma educativa que usa inteligencia artificial para responder dudas, recomendar rutas de estudio y mejorar la experiencia del estudiante.
+AprendeIA es un prototipo web para un trabajo de Interaccion Hombre-Maquina. Es una plataforma educativa donde los estudiantes suben sus propios PDFs, hacen preguntas a un tutor IA, y ponen a prueba sus conocimientos con evaluaciones inteligentes generadas automaticamente.
 
-## Que incluye
+---
 
-- Panel principal del estudiante.
-- Cursos activos.
-- Evaluacion interactiva con retroalimentacion.
-- Visualizacion de progreso.
-- Seccion de propuesta lista para explicar en el informe.
-- Asistente IA con dos modos:
-  - Modo demo, funciona sin configurar nada.
-  - Modo Gemini, usa la API de Gemini desde un servidor local.
+## ✨ Funcionalidades
 
-## Como abrirlo sin Gemini
+### 📊 Dashboard
+- Panel principal con **estadisticas dinamicas**: total de cursos, PDFs subidos, examenes completados y promedio de notas.
+- Muestra la **ultima evaluacion** realizada con puntaje y fecha.
+- Acceso rapido a todos los cursos.
 
-Puedes abrir `index.html` directamente en el navegador. En este modo el asistente funciona con respuestas de demostracion.
+### 📖 Cursos
+- **CRUD completo**: crear, ver y eliminar cursos.
+- Limite configurable de PDFs por curso (1-100).
+- Vista de selector de cursos con tarjetas visuales.
+- Al seleccionar un curso se accede al detalle con upload y documentos.
 
-## Como abrirlo con Gemini
+### 📄 Subida de PDFs (multiple)
+- Arrastra y suelta **varios PDFs a la vez**.
+- **Cola de procesamiento visual**: cada archivo muestra su estado individual (pendiente → subiendo → subido/error).
+- **Filtro inteligente**: archivos que exceden 20MB se marcan como omitidos sin bloquear el resto.
+- **Extraccion automatica de texto** con `pdf-parse` — el contenido se guarda en la base de datos.
+- El PDF se parsea **una sola vez** al subir. Nunca se vuelve a leer.
 
-Necesitas tener Node.js instalado.
+### 💬 Tutor IA (Chat)
+- Dos modos de funcionamiento:
+  - **Modo Gemini**: responde usando el contenido extraido de tus PDFs como contexto.
+  - **Modo Demo**: respuestas basicas por coincidencia de palabras (sin API key).
+- Renderizado Markdown completo con **sanitizado XSS** (DOMPurify).
+- Interfaz de chat con burbujas, animaciones y diseno responsive.
 
-1. Abre una terminal en la carpeta del proyecto.
-2. Crea una copia del archivo `.env.example` y llamala `.env`.
-3. Abre `.env` y pega tu clave:
+### 📝 Evaluacion Inteligente
+- Genera **20 preguntas de opcion multiple** (4 opciones c/u) usando Gemini, basadas en el contenido del curso.
+- Interfaz de quiz con **progreso visual**, puntaje en vivo y retroalimentacion inmediata.
+- Al finalizar: **nota, estadisticas y revision detallada** pregunta por pregunta.
+  - Marca en verde la respuesta correcta.
+  - Marca en rojo la respuesta del usuario si fallo.
+- Historial persistente de todas las evaluaciones realizadas.
 
-```env
-GEMINI_API_KEY=tu_clave_de_gemini
-GEMINI_MODEL=gemini-2.5-flash
-```
+### 🔐 Autenticacion
+- Registro e inicio de sesion con JWT.
+- Proteccion de rutas en toda la API.
+- Avatar con iniciales del usuario en el sidebar.
+- Sesion persistente en localStorage.
 
-4. Ejecuta:
+---
+
+## 🚀 Requisitos
+
+| Requisito | Version | Detalle |
+|-----------|---------|--------|
+| Node.js | 18+ | Entorno de ejecucion |
+| MySQL | 8+ | Base de datos local o remota |
+| Gemini API key | Opcional | Solo para modo IA completo |
+
+---
+
+## ⚡ Como ejecutar
 
 ```bash
+# 1. Clonar el proyecto
+git clone <repo-url>
+cd aprendeia
+
+# 2. Crear la base de datos
+mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS aprendeia"
+
+# 3. Configurar variables de entorno
+cp .env.example .env
+# Edita .env con tus credenciales:
+#   DB_USER=root
+#   DB_PASSWORD=tu_contraseña
+#   GEMINI_API_KEY=AIza... (opcional)
+
+# 4. Instalar dependencias
+npm install
+
+# 5. Iniciar el servidor
 npm start
+
+# 6. Abrir en el navegador
+# http://localhost:3000
 ```
 
-5. Abre en el navegador:
+> Las tablas se crean **automaticamente** al arrancar el servidor. No necesitas ejecutar migraciones manuales.
 
-```text
-http://localhost:3000
+---
+
+## 📁 Estructura del proyecto
+
+```
+📁 aprendeia/
+├── server.js                       # Punto de entrada
+├── src/
+│   ├── config/
+│   │   └── db.js                   # Pool MySQL + auto-migraciones
+│   ├── middleware/
+│   │   └── auth.js                 # JWT middleware
+│   ├── routes/
+│   │   ├── auth.js                 # Registro, login, /me
+│   │   ├── cursos.js               # CRUD cursos + subida PDF
+│   │   ├── chat.js                 # Chat con Gemini/Demo
+│   │   ├── evaluacion.js           # Evaluaciones con Gemini
+│   │   ├── dashboard.js            # Estadisticas del dashboard
+│   │   └── status.js               # Endpoint de estado
+│   └── utils/
+│       └── geminiHelper.js         # Validacion de API key
+├── public/
+│   ├── index.html                  # Frontend SPA
+│   ├── script.js                   # Logica del frontend
+│   └── styles.css                  # Estilos con design system
+├── uploads/                        # Archivos temporales
+├── .env.example                    # Template de configuracion
+├── package.json
+└── README.md
 ```
 
-Si la clave esta bien configurada, el indicador del prototipo cambiara de `Demo` a `Gemini`.
+---
 
-## Si sale error de puerto ocupado
+## 🗄️ Base de datos (auto-migracion)
 
-Si aparece `EADDRINUSE: address already in use :::3000`, significa que ya hay otra ventana usando el puerto 3000.
+El servidor crea las siguientes tablas al arrancar:
 
-Solucion rapida:
+| Tabla | Descripcion |
+|-------|-------------|
+| `usuarios` | Usuarios registrados (nombre, email, password_hash) |
+| `cursos` | Cursos por usuario (titulo, descripcion, pdf_limit) |
+| `documentos` | PDFs subidos con texto extraido (contenido_texto) |
+| `evaluaciones` | Evaluaciones realizadas (nota, total preguntas) |
+| `preguntas_evaluacion` | Preguntas generadas con respuestas y opciones |
 
-```bash
-npm run start:3001
-```
+Todas las tablas usan **InnoDB** con **foreign keys y ON DELETE CASCADE**. No necesitas crear nada manualmente.
 
-Luego abre:
+---
 
-```text
-http://localhost:3001
-```
+## 🐳 Solucion de problemas
 
-Tambien puedes cerrar la terminal anterior donde dejaste corriendo `npm start` y volver a ejecutar `npm start`.
+| Problema | Solucion |
+|----------|----------|
+| Puerto 3000 ocupado | El servidor prueba automaticamente 3001, 3002... hasta 10 intentos |
+| Forzar puerto especifico | `PORT=3001 npm start` |
+| Sigue apareciendo "Demo" | Verifica que `.env` tenga una clave Gemini real (no `TU_CLAVE_AQUI`) |
+| Error de conexion MySQL | Verifica que MySQL este corriendo y las credenciales en `.env` sean correctas |
+| Cache del navegador | Haz Ctrl+Shift+R (hard refresh) o agrega `?v=2` al final de la URL |
 
-## Si sigue apareciendo modo demo
-
-Revisa que tu archivo `.env` no tenga el texto de ejemplo. Debe tener una clave real:
-
-```env
-GEMINI_API_KEY=AIza...
-GEMINI_MODEL=gemini-2.5-flash
-```
-
-Si dice `TU_CLAVE_AQUI`, todavia no esta configurado.
-
-## Donde conseguir la API key
-
-Puedes obtener una clave desde Google AI Studio:
+### 🔑 Obtener API key de Gemini
 
 ```text
 https://aistudio.google.com/app/apikey
 ```
 
-No pegues tu API key dentro de `index.html` ni `script.js`. Este proyecto usa `server.js` para protegerla mejor.
+No pegues tu API key dentro de `index.html` ni `script.js`. Este proyecto la protege en el backend mediante variables de entorno.
 
-## Archivos principales
+---
 
-- `index.html`: estructura de la interfaz.
-- `styles.css`: diseno visual de la plataforma.
-- `script.js`: interacciones del prototipo y comunicacion con el asistente.
-- `server.js`: servidor local que conecta con Gemini.
-- `.env.example`: ejemplo para configurar la API key.
+## 🧠 Relacion con Interaccion Hombre-Maquina
 
-## Imagenes recomendadas para el informe
+El prototipo aplica principios de IHM:
 
-1. Pantalla principal
+- **Navegacion intuitiva**: sidebar con iconos, breadcrumbs e indicador visual de pagina activa.
+- **Retroalimentacion inmediata**: respuestas del chat en vivo, estados de carga animados, cola de subida con progreso.
+- **Carga cognitiva reducida**: informacion organizada en secciones, dashboard con metricas clave, tarjetas visuales.
+- **Control del usuario**: cada estudiante gestiona sus propios cursos, documentos y evaluaciones.
+- **Tolerancia al error**: validacion de formularios, confirmacion antes de eliminar, filtro de archivos grandes.
+- **Consistencia**: design system con variables CSS, botones y componentes reutilizables.
+- **Accesibilidad**: buen contraste, textos claros, etiquetas semantica, diseno responsive (3 breakpoints).
 
-Texto sugerido:
+---
 
-> La pantalla principal presenta el resumen del estudiante, su progreso y una ruta de aprendizaje recomendada por inteligencia artificial.
+## 📝 Explicacion corta para defender el proyecto
 
-2. Asistente IA con Gemini
-
-Texto sugerido:
-
-> El asistente IA permite resolver dudas de forma inmediata y ofrecer explicaciones personalizadas, mejorando la interaccion entre el usuario y la plataforma.
-
-3. Seccion de cursos
-
-Texto sugerido:
-
-> La seccion de cursos organiza los contenidos disponibles y permite solicitar rutas de estudio segun las necesidades del estudiante.
-
-4. Evaluacion interactiva
-
-Texto sugerido:
-
-> La evaluacion ofrece retroalimentacion inmediata despues de la respuesta del usuario, aplicando un principio clave de Interaccion Hombre-Maquina.
-
-5. Progreso del estudiante
-
-Texto sugerido:
-
-> La visualizacion del progreso permite identificar fortalezas y areas que necesitan refuerzo.
-
-6. Seccion Propuesta
-
-Texto sugerido:
-
-> La seccion de propuesta resume el problema, la solucion, los usuarios y el aporte del proyecto desde la perspectiva de IHM.
-
-## Relacion con Interaccion Hombre-Maquina
-
-El prototipo aplica principios de IHM porque:
-
-- Mejora la usabilidad con una navegacion clara.
-- Reduce la carga cognitiva al organizar la informacion en secciones simples.
-- Ofrece retroalimentacion inmediata en la evaluacion y el chat.
-- Apoya la accesibilidad con buen contraste y textos directos.
-- Personaliza el aprendizaje mediante recomendaciones.
-- Integra interaccion humano-IA a traves del tutor inteligente.
-
-## Explicacion corta para defender el proyecto
-
-> AprendeIA es una plataforma educativa asistida por inteligencia artificial que busca mejorar la experiencia del estudiante mediante recomendaciones personalizadas, retroalimentacion inmediata y un tutor inteligente conectado a Gemini. Desde Interaccion Hombre-Maquina, el proyecto se enfoca en crear una interfaz clara, accesible y facil de usar, reduciendo la carga cognitiva y fortaleciendo la comunicacion entre el usuario, la plataforma y la IA.
+> AprendeIA es una plataforma educativa donde los estudiantes suben sus propios materiales (PDFs), un tutor con IA responde preguntas basandose exclusivamente en ese contenido, y evaluaciones inteligentes generadas automaticamente miden su progreso. El proyecto aplica principios de Interaccion Hombre-Maquina como navegacion intuitiva, retroalimentacion inmediata, control del usuario sobre sus datos y carga cognitiva reducida.

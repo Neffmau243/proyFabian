@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>AprendeIA - Plataforma educativa inteligente</title>
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -59,24 +62,40 @@
 <!-- ─── APP (logueado) ─────────────────────────────────────────────────────── -->
 <div class="app-shell" id="appShell" style="display:none">
 
-  <!-- Sidebar -->
+  <!-- Sidebar rediseñada -->
   <aside class="sidebar">
-    <div class="brand">
-      <div class="brand-mark">AI</div>
-      <div>
-        <p>AprendeIA</p>
-        <span id="userName">Usuario</span>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" id="sidebarAvatar">U</div>
+      <div class="sidebar-user-info">
+        <p class="sidebar-user-name" id="userName">Usuario</p>
+        <span class="sidebar-user-plan">Estudiante</span>
       </div>
     </div>
 
     <nav class="nav-list">
-      <button class="nav-item active" data-view="dashboard" type="button">📚 Mis Cursos</button>
-      <button class="nav-item" data-view="curso" type="button">📖 Curso Actual</button>
-      <button class="nav-item" data-view="chat" type="button">💬 Tutor IA</button>
+      <button class="nav-item active" data-view="dashboard" type="button">
+        <span class="nav-icon">📊</span>
+        <span>Dashboard</span>
+      </button>
+      <button class="nav-item" data-view="curso" type="button">
+        <span class="nav-icon">📖</span>
+        <span>Cursos</span>
+      </button>
+      <button class="nav-item" data-view="chat" type="button">
+        <span class="nav-icon">💬</span>
+        <span>Tutor IA</span>
+      </button>
+      <button class="nav-item" data-view="evaluacion" type="button">
+        <span class="nav-icon">📝</span>
+        <span>Evaluación</span>
+      </button>
     </nav>
 
     <div class="sidebar-footer">
-      <button class="nav-item logout-btn" id="logoutBtn" type="button">🚪 Cerrar sesión</button>
+      <button class="nav-item logout-btn" id="logoutBtn" type="button">
+        <span class="nav-icon">🚪</span>
+        <span>Cerrar sesión</span>
+      </button>
     </div>
   </aside>
 
@@ -88,9 +107,54 @@
       <div class="section-heading">
         <div>
           <p class="eyebrow">Panel del estudiante</p>
-          <h2>Mis Cursos</h2>
+          <h2>Dashboard</h2>
         </div>
         <button class="btn-primary" id="createCourseBtn" type="button">+ Nuevo curso</button>
+      </div>
+
+      <!-- Stats cards -->
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-card">
+          <div class="stat-icon stat-icon-courses">📚</div>
+          <div class="stat-body">
+            <span class="stat-value" id="statCursos">0</span>
+            <span class="stat-label">Cursos</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon stat-icon-docs">📄</div>
+          <div class="stat-body">
+            <span class="stat-value" id="statPdfs">0</span>
+            <span class="stat-label">PDFs subidos</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon stat-icon-exams">📝</div>
+          <div class="stat-body">
+            <span class="stat-value" id="statEvaluaciones">0</span>
+            <span class="stat-label">Exámenes</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon stat-icon-grade">📊</div>
+          <div class="stat-body">
+            <span class="stat-value" id="statPromedio">0%</span>
+            <span class="stat-label">Promedio</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Última evaluación -->
+      <div class="last-eval-card" id="lastEvalCard" style="display:none">
+        <div class="last-eval-header">
+          <span>📋 Última evaluación</span>
+          <span class="last-eval-grade" id="lastEvalGrade">0%</span>
+        </div>
+        <p class="last-eval-course" id="lastEvalCurso">-</p>
+        <div class="last-eval-detail">
+          <span id="lastEvalScore">0/0</span>
+          <span id="lastEvalDate">-</span>
+        </div>
       </div>
 
       <!-- Modal crear curso -->
@@ -118,6 +182,7 @@
         </div>
       </div>
 
+      <h3 style="margin-bottom:12px">Mis Cursos</h3>
       <div class="course-grid" id="courseGrid">
         <div class="empty-state" id="emptyCourses">
           <p>📚 Aún no tienes cursos. ¡Crea tu primer curso!</p>
@@ -127,37 +192,152 @@
 
     <!-- ─── CURSO ACTUAL ─────────────────────────────────────────────────── -->
     <section class="view" id="curso">
+      <!-- Estado: sin curso seleccionado -->
+      <div id="cursoSelector">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Cursos</p>
+            <h2>Tus cursos</h2>
+          </div>
+          <button class="btn-primary" id="cursoCreateBtn" type="button">+ Nuevo curso</button>
+        </div>
+        <div class="curso-selector-grid" id="cursoSelectorGrid">
+          <p class="muted">Cargando cursos...</p>
+        </div>
+      </div>
+
+      <!-- Estado: curso seleccionado -->
+      <div id="cursoDetail" style="display:none">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow" id="cursoEyebrow">Curso</p>
+            <h2 id="cursoTitle">-</h2>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="btn-ghost" id="cursoBackBtn" type="button" style="font-size:13px">← Cambiar curso</button>
+            <div class="pdf-counter" id="pdfCounter">0 / 20 PDFs</div>
+          </div>
+        </div>
+
+        <div class="curso-desc" id="cursoDesc"></div>
+
+        <!-- Subir PDFs -->
+        <div class="upload-area" id="uploadArea">
+          <form id="uploadForm">
+            <div class="upload-dropzone" id="dropzone">
+              <p>📄 Arrastra PDFs aquí o haz clic para seleccionar</p>
+              <p class="upload-hint">PDF hasta 20 MB c/u — puedes soltar varios</p>
+              <input type="file" accept=".pdf" id="pdfInput" style="display:none" multiple>
+            </div>
+            <button class="btn-primary" type="submit" id="uploadBtn" style="display:none">Subir PDFs</button>
+          </form>
+
+          <!-- Cola de subida múltiple -->
+          <div class="upload-queue" id="uploadQueue" style="display:none"></div>
+        </div>
+
+        <!-- Lista de documentos -->
+        <div class="documentos-list" id="documentosList">
+          <h3>📄 Documentos del curso</h3>
+          <div class="empty-state" id="emptyDocs">
+            <p>Sube tu primer PDF para comenzar</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── EVALUACION ──────────────────────────────────────────────────── -->
+    <section class="view" id="evaluacion">
       <div class="section-heading">
         <div>
-          <p class="eyebrow" id="cursoEyebrow">Curso</p>
-          <h2 id="cursoTitle">Selecciona un curso</h2>
+          <p class="eyebrow">Evaluación inteligente</p>
+          <h2>Pon a prueba tus conocimientos</h2>
         </div>
-        <div class="pdf-counter" id="pdfCounter">0 / 20 PDFs</div>
       </div>
 
-      <div class="curso-desc" id="cursoDesc"></div>
-
-      <!-- Subir PDF -->
-      <div class="upload-area" id="uploadArea">
-        <form id="uploadForm">
-          <div class="upload-dropzone" id="dropzone">
-            <p>📄 Arrastra un PDF aquí o haz clic para seleccionar</p>
-            <p class="upload-hint">PDF hasta 20 MB</p>
-            <input type="file" accept=".pdf" id="pdfInput" style="display:none">
+      <!-- Estado inicial: elegir curso -->
+      <div id="evalInit">
+        <div class="eval-intro">
+          <p>Selecciona un curso y genera un examen de <strong>20 preguntas</strong> basadas en su contenido. La IA creará las preguntas automáticamente.</p>
+          <div class="field" style="max-width:400px">
+            <label>Curso a evaluar</label>
+            <select id="evalCursoSelect">
+              <option value="">— Selecciona un curso —</option>
+            </select>
           </div>
-          <button class="btn-primary" type="submit" id="uploadBtn" style="display:none">Subir PDF</button>
-        </form>
-        <div class="upload-progress" id="uploadProgress" style="display:none">
-          <div class="bar"><span></span></div>
-          <p>Procesando PDF...</p>
+          <button class="btn-primary" id="evalStartBtn" disabled>🎯 Iniciar evaluación</button>
+        </div>
+
+        <!-- Historial de evaluaciones -->
+        <div class="eval-historial" id="evalHistorial">
+          <h3>Evaluaciones anteriores</h3>
+          <div id="evalList">
+            <p class="muted">Aún no has realizado ninguna evaluación.</p>
+          </div>
         </div>
       </div>
 
-      <!-- Lista de documentos -->
-      <div class="documentos-list" id="documentosList">
-        <h3>Documentos del curso</h3>
-        <div class="empty-state" id="emptyDocs">
-          <p>📄 Sube tu primer PDF para comenzar</p>
+      <!-- Estado: generando preguntas -->
+      <div id="evalGenerating" style="display:none">
+        <div class="eval-loading">
+          <div class="eval-spinner"></div>
+          <p>🧠 La IA está generando preguntas basadas en el contenido del curso...</p>
+          <p class="muted">Esto puede tomar unos segundos.</p>
+        </div>
+      </div>
+
+      <!-- Estado: respondiendo preguntas -->
+      <div id="evalQuiz" style="display:none">
+        <div class="eval-progress-bar">
+          <div class="eval-progress-fill" id="evalProgressFill"></div>
+        </div>
+        <div class="eval-progress-text">
+          <span id="evalCounter">1 / 20</span>
+          <span id="evalScore">✅ 0</span>
+        </div>
+
+        <div class="eval-question-card" id="evalQuestionCard">
+          <p class="eval-question-text" id="evalQuestionText">Cargando pregunta...</p>
+          <div class="eval-options" id="evalOptions">
+            <!-- Las opciones se generan dinámicamente -->
+          </div>
+        </div>
+
+        <div class="eval-actions">
+          <button class="btn-primary" id="evalNextBtn" disabled>Siguiente →</button>
+        </div>
+      </div>
+
+      <!-- Estado: resultados -->
+      <div id="evalResults" style="display:none">
+        <div class="eval-results-card">
+          <div class="eval-grade-circle" id="evalGradeCircle">
+            <span id="evalGradeValue">0</span>
+            <span class="eval-grade-label">puntos</span>
+          </div>
+          <h2 id="evalResultTitle">✨ Evaluación completada</h2>
+          <div class="eval-stats">
+            <div class="eval-stat">
+              <span class="eval-stat-value" id="evalCorrectas">0</span>
+              <span class="eval-stat-label">Correctas</span>
+            </div>
+            <div class="eval-stat">
+              <span class="eval-stat-value" id="evalTotalPreg">20</span>
+              <span class="eval-stat-label">Preguntas</span>
+            </div>
+            <div class="eval-stat">
+              <span class="eval-stat-value" id="evalPercentage">0%</span>
+              <span class="eval-stat-label">Acierto</span>
+            </div>
+          </div>
+          <button class="btn-primary" id="evalReviewToggle" type="button" style="margin-top:8px">📋 Revisar respuestas</button>
+          <button class="btn-primary" id="evalBackBtn" type="button">Volver al inicio</button>
+        </div>
+
+        <!-- Revisión detallada de respuestas -->
+        <div class="eval-review" id="evalReview" style="display:none">
+          <h3>📋 Revisión de respuestas</h3>
+          <div id="evalReviewList"></div>
         </div>
       </div>
     </section>
